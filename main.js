@@ -23,6 +23,7 @@ const gunMaterial = new THREE.SpriteMaterial({ map: gunTexture });
 const botMaterial = new THREE.SpriteMaterial({ map: botTexture });
 
 const botSprite = new THREE.Sprite(botMaterial);
+
 const gunSprite = new THREE.Sprite(gunMaterial);
 
 //Aqui se pode criar um mapa do tamanho desejado, 
@@ -77,21 +78,6 @@ const groundMatrix = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-
-function updateFixedSpritePosition() {
-    // Obtenha a direção do mundo da câmera
-    const cameraDirection = new THREE.Vector3();
-    camera.getWorldDirection(cameraDirection);
-
-    // Defina a posição do sprite como um deslocamento da posição da câmera
-    const spriteOffset = new THREE.Vector3(1, 0, 0);
-    const spritePosition = camera.position.clone().add(spriteOffset);
-    gunSprite.position.copy(spritePosition);
-
-    // Ajuste a escala do sprite conforme necessário
-    gunSprite.scale.set(1, 1, 1); // Ajuste conforme necessário
-}
-
 function createCubesFromMatrix(matrix, yOffset, wallMaterial, doorMaterial, doorCubes, bots) {
     const numRows = matrix.length;
     const numCols = matrix[0].length;
@@ -137,6 +123,15 @@ function positionCameraAtMatrixPosition(matrix, camera, cubeDistance) {
 }
 
 positionCameraAtMatrixPosition(wallsMatrix, camera, 2);
+
+//Configurações da arma
+function positionGun(cameraX, cameraZ) {
+    gunSprite.position.set(cameraX, 0, cameraZ - 0.195);
+}
+
+gunSprite.scale.set(0.3, 0.3, 0.3);
+scene.add(gunSprite);
+
 
 const moveSpeed = 0.1;
 const keysPressed = {};
@@ -207,7 +202,7 @@ function animate() {
 
 	checkCollision();
 
-    updateFixedSpritePosition();
+    positionGun(camera.position.x, camera.position.z)
 	
 	renderer.render(scene, camera);
 }
