@@ -4,6 +4,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x3c3c3c);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+const ambientLight = new THREE.AmbientLight(0x000dff);
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -126,12 +128,13 @@ positionCameraAtMatrixPosition(wallsMatrix, camera, 2);
 
 //Configurações da arma
 function positionGun(cameraX, cameraZ) {
-    gunSprite.position.set(cameraX, 0, cameraZ - 0.195);
+    gunSprite.position.set(cameraX  - Math.sin(angulo) * 0.18, 0, cameraZ - Math.cos(angulo) * 0.18);
 }
 
 gunSprite.scale.set(0.3, 0.3, 0.3);
 scene.add(gunSprite);
 
+scene.add(ambientLight);
 
 const moveSpeed = 0.1;
 const keysPressed = {};
@@ -184,8 +187,16 @@ function handleKeyUp(event) {
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
+let angulo = 0;
 function animate() {
 	requestAnimationFrame(animate);
+
+    let px = camera.position.x
+    let py = camera.position.y
+    let pz = camera.position.z
+
+    camera.lookAt(px - Math.sin(angulo), py, pz - Math.cos(angulo))
+    positionGun(px - Math.sin(angulo), pz - Math.cos(angulo));
   
 	if (keysPressed['ArrowLeft']) {
 		camera.position.x -= moveSpeed;
@@ -194,15 +205,26 @@ function animate() {
 		camera.position.x += moveSpeed;
 	}
 	if (keysPressed['ArrowUp']) {
-		camera.position.z -= moveSpeed;
+		camera.position.z -= moveSpeed * Math.cos(angulo);
+        camera.position.x -= moveSpeed * Math.sin(angulo);
 	}
 	if (keysPressed['ArrowDown']) {
-		camera.position.z += moveSpeed;
+		camera.position.z += moveSpeed * Math.cos(angulo);
+		camera.position.x += moveSpeed * Math.sin(angulo);
+
 	}
+    if (keysPressed['a']) {
+        angulo += 0.05;
+    }
+    if (keysPressed['d']) {
+        angulo -= 0.05;
+    }
 
 	checkCollision();
 
-    positionGun(camera.position.x, camera.position.z)
+    // gunSprite.position.set(px - Math.sin(angulo), py, pz - Math.cos(angulo) - 0.195);
+
+    positionGun(px, pz);
 	
 	renderer.render(scene, camera);
 }
